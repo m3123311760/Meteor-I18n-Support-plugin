@@ -25,14 +25,22 @@ public abstract class ModuleMixin {
     @Shadow
     @Final
     public String description;
-    @Unique
-    public String name;
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onInit(CallbackInfo ci){
+        // 保存原始的title值作为模块名称
+        String originalName = this.title;
+        if(originalName == null || originalName.isEmpty()) {
+            return;
+        }
+        
+        // 将模块名称转换为语言文件中的key格式：小写，空格替换为连字符
+        // 例如 "Anchor Aura" -> "anchor-aura"
+        String moduleKeyName = originalName.toLowerCase().replace(' ', '-');
+        
         TRANSLATOR.reload(MC.getResourceManager());
-        String ModuleKey = "Module.Meteor." + this.name;
-        String DescriptionKey = "Module.Meteor." + this.name + ".Description";
-        this.title = TRANSLATOR.Translate(ModuleKey, this.name);
+        String ModuleKey = "Module.Meteor." + moduleKeyName;
+        String DescriptionKey = "Module.Meteor." + moduleKeyName + ".Description";
+        this.title = TRANSLATOR.Translate(ModuleKey, originalName);
         this.description = TRANSLATOR.Translate(DescriptionKey,this.description);
     }
 }

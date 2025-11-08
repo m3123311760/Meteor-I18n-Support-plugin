@@ -22,10 +22,16 @@ public class Translator {
     private final JsonObject langJson = new JsonObject();
     private Map<String, String> currentLangStrings;
     public String Translate(String key,String name) {
+        // 如果currentLangStrings为null，返回原始名称
+        if(this.currentLangStrings == null){
+            return name;
+        }
+        
         String value = this.currentLangStrings.get(key);
         if(value != null){
             return value;
         }else{
+            // 如果找不到翻译，将未翻译的项写入lang.json文件
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             langJson.addProperty(key,name);
             Path path = Paths.get("lang.json");
@@ -53,13 +59,14 @@ public class Translator {
 
     private Iterable<String> getCurrentLangCodes() {
         // Weird bug: Some users have their language set to "en_US" instead of
-        // "en_us.json" for some reason. Last seen in 1.21.
+        // "en_us" for some reason. Last seen in 1.21.
         String mainLangCode = MinecraftClient.getInstance().getLanguageManager()
             .getLanguage().toLowerCase();
 
         ArrayList<String> langCodes = new ArrayList<>();
-        langCodes.add("en_us.json");
-        if(!"en_us.json".equals(mainLangCode))
+        langCodes.add("en_us");
+        // 如果当前语言不是英文，则添加当前语言代码
+        if(!"en_us".equals(mainLangCode))
             langCodes.add(mainLangCode);
 
         return langCodes;
